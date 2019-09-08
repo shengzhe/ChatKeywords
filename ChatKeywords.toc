@@ -1,0 +1,8 @@
+## Interface: 11302
+## Title: ChatKeywords
+## Notes: Filter chat messages by /ckw set (keywords)
+## Author: sz
+## Version: 1.0.0
+## SavedVariables: ChatKeywordsDB
+
+ChatKeywords.lua
