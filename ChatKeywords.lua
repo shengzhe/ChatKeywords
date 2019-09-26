@@ -116,7 +116,28 @@ initTextFrame()
 ------------------------------------------------------------------------------
 
 local function printMsg(event, channel, name, msg)
-	local text = "[" .. channel .. "][" .. name .. "]" .. ": " .. msg
+	local prefix = ''
+	if event == 'CHAT_MSG_WHISPER' then
+		prefix = 'w'
+	elseif event == 'CHAT_MSG_SAY' then
+		prefix = 's'
+	elseif event == 'CHAT_MSG_YELL' then
+		prefix = 'y'
+	elseif event == 'CHAT_MSG_GUILD' then
+		prefix = 'g'
+	elseif event == 'CHAT_MSG_PARTY' or event == 'CHAT_MSG_PARTY_LEADER' then
+		prefix = 'p'
+	elseif event == 'CHAT_MSG_RAID' or event == 'CHAT_MSG_RAID_LEADER' then
+		prefix = 'r'
+	end
+
+	local text = "[" .. name .. "]" .. ": " .. msg
+	if channel ~= '' then
+		text = "[" .. channel .. "]" .. text
+	end
+	if prefix ~= '' then
+		text = "[" .. prefix .. "]" .. text
+	end
 
 	showTextFrame(text)
 
@@ -128,9 +149,18 @@ local function printMsg(event, channel, name, msg)
 	-- UIErrorsFrame:AddMessage(text)
 end
 
-local function hookMessage(self, event, msg, author, arg10, channel, name, arg11, arg12, arg13, arg14, arg15, arg16, playerid, ...)
+local function hasKeyword(msg, word)
+	for str in string.gmatch(word, "([^ ]+)") do
+		if not string.find(msg:lower(), str:lower()) then
+			return false
+		end
+	end
+	return true
+end
+
+local function hookMessage(self, event, msg, author, arg10, channel, name, arg11, arg12, arg13, arg14, arg15, arg16, playerid, ...)	
 	for idx, word in ipairs(words) do
-		if strfind(msg, word) then
+		if hasKeyword(msg, word) then
 			savedAuthor = author
 			printMsg(event, channel, name, msg)
 		end
@@ -144,6 +174,7 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", hookMessage)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_COMMUNITIES_CHANNEL", hookMessage)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_BN_WHISPER", hookMessage)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_SAY", hookMessage)
+ChatFrame_AddMessageEventFilter("CHAT_MSG_YELL", hookMessage)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_GUILD", hookMessage)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY", hookMessage)
 ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY_LEADER", hookMessage)
